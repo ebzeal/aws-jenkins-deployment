@@ -1,11 +1,12 @@
-# Dependencies
+# --- Dependencies ---
 node_modules/
 
-# Build output
+# --- Build output ---
 /frontend/build/
 /backend/dist/
+coverage/
 
-# Terraform
+# --- Terraform ---
 **/.terraform/
 **/terraform.tfstate
 **/terraform.tfstate.*
@@ -15,23 +16,32 @@ node_modules/
 **/terraform.tfvars
 !**/terraform.tfvars.example
 
-# Secrets / credentials
+# --- Ansible-generated (machine-specific) ---
+jenkins/ansible/inventory.ini
+jenkins/terraform/jenkins-key.pem
+
+# --- Environment files ---
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.development
+
+# --- Keys / certificates / credentials ---
 *.pem
 *.key
+*.ppk
+*.p12
+*.pfx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
 *credentials*
+aws-credentials
 
-# OS / editor
+# --- OS / editor ---
 .DS_Store
 *.log
 npm-debug.log*
 .vscode/
 .idea/
-
-# Test coverage
-coverage/
-
-# Ansible-generated (machine-specific)
-jenkins/ansible/inventory.ini
