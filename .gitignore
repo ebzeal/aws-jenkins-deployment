@@ -20,6 +20,9 @@ coverage/
 jenkins/ansible/inventory.ini
 jenkins/terraform/jenkins-key.pem
 
+# --- Docs (local only) ---
+doc/
+
 # --- Environment files ---
 .env
 .env.*
@@ -45,3 +48,4 @@ aws-credentials
 npm-debug.log*
 .vscode/
 .idea/
+/doc/*
