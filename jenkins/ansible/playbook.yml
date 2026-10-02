@@ -97,14 +97,17 @@
         - jenkins
         - ubuntu
 
-    - name: Ensure services are enabled and running
+    - name: Ensure Docker is enabled and running
       ansible.builtin.systemd:
-        name: "{{ item }}"
+        name: docker
         state: started
         enabled: yes
-      loop:
-        - docker
-        - jenkins
+
+    - name: Restart Jenkins to pick up the docker group
+      ansible.builtin.systemd:
+        name: jenkins
+        state: restarted
+        enabled: yes
 
     - name: Wait for Jenkins to be ready
       ansible.builtin.uri:

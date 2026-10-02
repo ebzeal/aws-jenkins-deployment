@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    AWS_ACCOUNT_ID = '<ACCOUNT_ID>'
+    AWS_ACCOUNT_ID = '898220629935'
     AWS_REGION     = 'us-east-1'
     CLUSTER        = 'techpathway-cluster'
     BACKEND_SVC    = 'techpathway-backend-service'
@@ -72,7 +72,7 @@ pipeline {
 
   post {
     success {
-      echo "Deployed frontend + backend (tag ${env.IMAGE_TAG}). URL: http://<ALB_DNS_NAME>"
+      echo "Deployed frontend + backend (tag ${env.IMAGE_TAG}). URL: http://techpathway-alb-2040483084.us-east-1.elb.amazonaws.com"
     }
     failure {
       echo "Pipeline failed."
