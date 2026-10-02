@@ -18,3 +18,8 @@ const config = {
 };
 
 module.exports = config;
+// {
+//     "UserId": "AIDA5CIQ7D6XTQNJJMCSG",
+//     "Account": "898220629935",
+//     "Arn": "arn:aws:iam::898220629935:user/ebzeal"
+// }

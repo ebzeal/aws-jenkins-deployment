@@ -768,6 +768,26 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# The managed AmazonECSTaskExecutionRolePolicy no longer includes
+# logs:CreateLogGroup, so grant it explicitly for the /ecs/* log groups.
+resource "aws_iam_role_policy" "ecs_execution_logs" {
+  name = "${var.project_name}-ecs-logs"
+  role = aws_iam_role.ecs_task_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+      Resource = "*"
+    }]
+  })
+}
+
 resource "aws_ecs_task_definition" "backend" {
   family                   = "${var.project_name}-backend"
   network_mode             = "awsvpc"
@@ -993,17 +1013,24 @@ Record `alb_dns_name` — this is your frontend public URL
 ## 6. Seed images so the initial ECS deployment is healthy
 
 Before the first Jenkins run, push an initial `latest` image so ECS tasks can
-start (the Terraform task definitions point at `:latest`):
+start (the Terraform task definitions point at `:latest`).
+
+> **Important**: Fargate runs `linux/amd64`. If you build on an Apple Silicon
+> (M-series) Mac, you must pass `--platform linux/amd64`, otherwise the pushed
+> image is `arm64` and ECS fails with
+> `CannotPullContainerError: ... descriptor matching platform 'linux/amd64'`.
+> (The Jenkins server is x86_64, so its builds are amd64 natively — the flag is
+> harmless there.)
 
 ```bash
 aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
 
-docker build -t techpathway-backend backend
+docker build --platform linux/amd64 -t techpathway-backend backend
 docker tag techpathway-backend:latest <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/techpathway-backend:latest
 docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/techpathway-backend:latest
 
-docker build -t techpathway-frontend frontend
+docker build --platform linux/amd64 -t techpathway-frontend frontend
 docker tag techpathway-frontend:latest <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/techpathway-frontend:latest
 docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/techpathway-frontend:latest
 ```
@@ -1130,8 +1157,8 @@ pipeline {
         script {
           env.IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.substring(0, 8)}"
         }
-        sh 'docker build -t techpathway-backend:latest backend'
-        sh 'docker build -t techpathway-frontend:latest frontend'
+        sh 'docker build --platform linux/amd64 -t techpathway-backend:latest backend'
+        sh 'docker build --platform linux/amd64 -t techpathway-frontend:latest frontend'
       }
     }
 

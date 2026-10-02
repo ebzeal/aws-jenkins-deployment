@@ -1,0 +1,12 @@
+output "alb_dns_name" {
+  description = "Public URL of the frontend"
+  value       = aws_lb.main.dns_name
+}
+
+output "backend_ecr_url" {
+  value = aws_ecr_repository.backend.repository_url
+}
+
+output "frontend_ecr_url" {
+  value = aws_ecr_repository.frontend.repository_url
+}
