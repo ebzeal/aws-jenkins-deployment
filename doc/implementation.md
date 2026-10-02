@@ -101,6 +101,15 @@ Inline policy `JenkinsDeployPolicy`:
         "ecs:UpdateService"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::<ACCOUNT_ID>:role/techpathway-ecs-execution"
+      ]
     }
   ]
 }
@@ -209,6 +218,8 @@ data "aws_vpc" "default" {
   default = true
 }
 
+data "aws_caller_identity" "current" {}
+
 # SSH key generated locally and stored as .pem (ignored by git)
 resource "tls_private_key" "jenkins" {
   algorithm = "RSA"
@@ -302,6 +313,15 @@ resource "aws_iam_role_policy" "jenkins_deploy" {
           "ecs:UpdateService"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-ecs-execution"
+        ]
       }
     ]
   })
